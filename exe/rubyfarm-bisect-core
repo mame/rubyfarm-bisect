@@ -1,0 +1,37 @@
+#!/usr/bin/env ruby
+
+require "shellwords"
+
+REPOSITORY = "mametter/rubyfarm"
+
+puts
+rev = "r" + `git show HEAD`[%r(git-svn-id: svn\+ssh://ci.ruby-lang.org/ruby/trunk@(\d+)), 1]
+log = -> msg do
+  puts "\e[1m\e[32mrubyfarm-bisect[#{ rev }]: #{ msg }\e[0m"
+end
+run = -> color, *cmd do
+  log[Shellwords.join(cmd)]
+  print color
+  system(*cmd)
+  print "\e[0m"
+end
+tag = "mametter/rubyfarm:#{ rev }"
+
+run["\e[34m", "docker", "pull", tag]
+
+unless $?.success?
+  log["failed to pull #{ tag }; skip #{ rev }"]
+  exit 125
+end
+
+i = ARGV.index("--")
+opt = ARGV[0, i]
+cmd = ARGV[i + 1 .. -1]
+
+run["\e[31m", "docker", "run", "--rm", "-t", *opt, tag, *cmd]
+
+status = $?.exitstatus
+msg = { 0 => "good", 125 => "skip" }[status] || "bad"
+log["status = #{ status } (#{ rev } is #{ msg })"]
+puts
+exit status

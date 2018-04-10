@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+require "tmpdir"
+require "optparse"
+require "open3"
+
+FIRST_COMMIT = "7c1b30a602ab109d8d5388d7dfb3c5b180ba24e1" # r57410
+ORIGINAL_GIT_PATH = "https://git.ruby-lang.org/ruby.git"
+CORE = File.join(__dir__, "rubyfarm-bisect-core")
+
+good_commit = FIRST_COMMIT
+bad_commit = "HEAD"
+git_url = ORIGINAL_GIT_PATH
+mounts = []
+
+opt = OptionParser.new
+opt.on("-u URL", "--git-url URL", "URL of git repository (defalut: #{ ORIGINAL_GIT_PATH })") {|v| git_url = v }
+opt.on("-g COMMIT", "--good-commit COMMIT", "good commit (defalut: 7c1b30a)") {|v| good_commit = v }
+opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (defalut: HEAD)") {|v| bad_commit = v }
+opt.on("-m PATH", "--mount-volume PATH", "mount PATH to /root (default: none)") {|v| mounts << v }
+opt.on("-t", "--test-rb", "run test.rb") do
+  mounts = ["test.rb"]
+  ARGV.concat(["ruby", "/root/test.rb"])
+end
+opt.order!(ARGV)
+
+mounts = mounts.flat_map do |path|
+  path = File.expand_path(path)
+  bind = nil
+  if File.directory?(path)
+    bind = "#{ path }:/root"
+  else
+    bind = "#{ path }:/root/#{ File.basename(path) }"
+  end
+  ["-v", bind + ":ro"]
+end
+
+solve_rev = -> commit do
+  case commit
+  when /\A\h+\z/
+    commit
+  when /\Ar(\d+)\z/
+    id = "git-svn-id: svn+ssh://ci.ruby-lang.org/ruby/trunk@#$1"
+    commits, = Open3.capture2("git", "log", "--grep", id, "--format=format:%H")
+    commits.lines.last.chomp
+  else
+    raise "unknown revision format: #{ commit }"
+  end
+end
+
+puts "color legend: \e[36mgit clone\e[0m git bisect \e[1m\e[32mrubyfarm-bisect\e[0m \e[34mdocker\e[0m \e[31mtest script\e[0m"
+puts
+Dir.mktmpdir do |dir|
+  Dir.chdir(dir) do
+    print "\e[36m"
+    system("git", "clone", git_url)
+    puts "\e[0m"
+    Dir.chdir("ruby") do
+      system("git", "bisect", "start", solve_rev[bad_commit], solve_rev[good_commit])
+      system("git", "bisect", "run", CORE, *mounts, "--", *ARGV)
+    end
+  end
+end
