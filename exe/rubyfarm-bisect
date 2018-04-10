@@ -37,14 +37,12 @@ end
 
 solve_rev = -> commit do
   case commit
-  when /\A\h+\z/
-    commit
   when /\Ar(\d+)\z/
     id = "git-svn-id: svn+ssh://ci.ruby-lang.org/ruby/trunk@#$1"
     commits, = Open3.capture2("git", "log", "--grep", id, "--format=format:%H")
     commits.lines.last.chomp
   else
-    raise "unknown revision format: #{ commit }"
+    commit
   end
 end
 
