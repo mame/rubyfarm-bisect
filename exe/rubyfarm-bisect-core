@@ -17,11 +17,13 @@ run = -> color, *cmd do
 end
 tag = "mametter/rubyfarm:#{ rev }"
 
-run["\e[34m", "docker", "pull", tag]
-
+run["\e[34m", "docker", "image", "inspect", "-f", "ok", tag]
 unless $?.success?
-  log["failed to pull #{ tag }; skip #{ rev }"]
-  exit 125
+  run["\e[34m", "docker", "pull", tag]
+  unless $?.success?
+    log["failed to pull #{ tag }; skip #{ rev }"]
+    exit 125
+  end
 end
 
 i = ARGV.index("--")
