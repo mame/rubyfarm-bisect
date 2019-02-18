@@ -2,7 +2,12 @@
 
 This tool allows you to do "git bisect" MRI revisions easily.
 Instead of compiling each revision locally, it uses ["mametter/rubyfarm" repository](https://hub.docker.com/r/mametter/rubyfarm/tags/) in DockerHub, which contains all MRI revisions since r57410 that were successfully built.
-In short, you don't need to worry about "exit 125" (compilation failure).
+
+By using rubyfarm-bisect, you don't have to worry about:
+
+* Compilation failure ("exit 125").  rubyfarm-bisect handles it.
+* The range of bisect.  rubyfarm-bisect has a good default.
+* The order of good and bad commits.  rubyfarm-bisect automatically detects the order.
 
 ## How to setup
 
@@ -33,18 +38,23 @@ The simplest way:
 $ rubyfarm-bisect ruby -e '<your test code>'
 ```
 
-which assumes that `<your test code>` runs successfully at r57410, and fails at HEAD.
+which assumes that `<your test code>` runs successfully at r57410, and fails at "trunk".
 
 ### `-g`/`-b`: specify a good/bad commit range
 
 You can specify good and bad commits for git bisect:
 
 ```
-$ rubyfarm-bisect -g 7c1b30a6 -b HEAD ruby -e '<your test code>'
+$ rubyfarm-bisect -g 7c1b30a6 -b trunk ruby -e '<your test code>'
 ```
 
 `-g` is a good commit, and `-b` is a bad commit.
 The arguments must be a SVN revision (e.g., "r60000"), or a commit hash of [git.ruby-lang.org/ruby.git](https://git.ruby-lang.org/ruby.git) (e.g., 7c1b30a6).
+
+You don't have to worry about which is good and bad:
+
+* rubyfarm-bisect first checks if the good commit is an ancestor of the bad one.  If not, it swaps the good and bad ones.
+* rubyfarm-bisect then checks if the test passes at the good (older) commit.  If it does not pass the test, it works as a "reversed" mode; it tries to find the first "good" commit.
 
 ### `-u`: specify a git url
 
