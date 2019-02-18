@@ -9,19 +9,21 @@ ORIGINAL_GIT_PATH = "https://git.ruby-lang.org/ruby.git"
 CORE = File.join(__dir__, "rubyfarm-bisect-core")
 
 good_commit = FIRST_COMMIT
-bad_commit = "HEAD"
+bad_commit = "trunk"
 git_url = ORIGINAL_GIT_PATH
 mounts = []
+auto = true
 
 opt = OptionParser.new
 opt.on("-u URL", "--git-url URL", "URL of git repository (defalut: #{ ORIGINAL_GIT_PATH })") {|v| git_url = v }
 opt.on("-g COMMIT", "--good-commit COMMIT", "good commit (defalut: 7c1b30a)") {|v| good_commit = v }
-opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (defalut: HEAD)") {|v| bad_commit = v }
+opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (defalut: trunk)") {|v| bad_commit = v }
 opt.on("-m PATH", "--mount-volume PATH", "mount PATH to /root (default: none)") {|v| mounts << v }
 opt.on("-t", "--test-rb", "run test.rb") do
   mounts = ["test.rb"]
   ARGV.concat(["ruby", "/root/test.rb"])
 end
+opt.on("--no-auto", "disable automatic detection of the order (good->bad or bad->good)") { auto = false }
 opt.order!(ARGV)
 
 mounts = mounts.flat_map do |path|
@@ -54,8 +56,30 @@ Dir.mktmpdir do |dir|
     system("git", "clone", git_url)
     puts "\e[0m"
     Dir.chdir("ruby") do
+      good_commit = solve_rev[good_commit]
+      bad_commit = solve_rev[bad_commit]
+
+      if !system("git", "merge-base", "--is-ancestor", solve_rev[good_commit], solve_rev[bad_commit])
+        puts "\e[1m\e[32m#{ good_commit } is not an ancestor of #{ bad_commit }.  Try to reverse.\e[0m"
+        good_commit, bad_commit = bad_commit, good_commit
+        if !system("git", "merge-base", "--is-ancestor", solve_rev[good_commit], solve_rev[bad_commit])
+          puts "\e[1m\e[32m#{ good_commit } is not an ancestor of #{ bad_commit }.  Aborting.\e[0m"
+          exit 1
+        end
+      end
+
+      order = "normal"
+      if auto
+        system("git", "checkout", solve_rev[good_commit])
+        if !system(CORE, "--", *ARGV)
+          puts "\e[1m\e[32mThe beginning commit #{ good_commit } doesn't pass the test.  Find the first good commit. \e[0m"
+          order = "reversed"
+        end
+      end
+
       system("git", "bisect", "start", solve_rev[bad_commit], solve_rev[good_commit])
-      system("git", "bisect", "run", CORE, *mounts, "--", *ARGV)
+      env = { "RUBYFARM_BISECT_ORDER" => order }
+      system(env, "git", "bisect", "run", CORE, *mounts, "--", *ARGV)
     end
   end
 end

@@ -15,7 +15,7 @@ run = -> color, *cmd do
   system(*cmd)
   print "\e[0m"
 end
-tag = "mametter/rubyfarm:#{ rev }"
+tag = REPOSITORY + ":#{ rev }"
 
 run["\e[34m", "docker", "image", "inspect", "-f", "ok", tag]
 unless $?.success?
@@ -36,4 +36,11 @@ status = $?.exitstatus
 msg = { 0 => "good", 125 => "skip" }[status] || "bad"
 log["status = #{ status } (#{ rev } is #{ msg })"]
 puts
+exit 125 if status == 125
+if ENV["RUBYFARM_BISECT_ORDER"] == "reversed"
+  10.times { puts }
+  p status
+  10.times { puts }
+end
+exit(status == 0 ? 1 : 0) if ENV["RUBYFARM_BISECT_ORDER"] == "reversed"
 exit status
