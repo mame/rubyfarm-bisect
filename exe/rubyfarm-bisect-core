@@ -2,7 +2,7 @@
 
 require "shellwords"
 
-REPOSITORY = "mametter/rubyfarm"
+REPOSITORY = "rubylang/rubyfarm"
 
 puts
 rev = "r" + `git show HEAD`[%r(git-svn-id: svn\+ssh://ci.ruby-lang.org/ruby/trunk@(\d+)), 1]

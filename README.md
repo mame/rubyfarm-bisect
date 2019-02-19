@@ -1,7 +1,7 @@
 # rubyfarm-bisect
 
 This tool allows you to do "git bisect" MRI revisions easily.
-Instead of compiling each revision locally, it uses ["mametter/rubyfarm" repository](https://hub.docker.com/r/mametter/rubyfarm/tags/) in DockerHub, which contains all MRI revisions since r57410 that were successfully built.
+Instead of compiling each revision locally, it uses ["rubylang/rubyfarm" repository](https://hub.docker.com/r/rubylang/rubyfarm/tags/) in DockerHub, which contains all MRI revisions since r57410 that were successfully built.
 
 By using rubyfarm-bisect, you don't have to worry about:
 
@@ -20,13 +20,13 @@ $ gem install rubyfarm-biesct
 You also need to be able to use "docker" command without "sudo".
 
 ```
-$ docker run --rm -t mametter/rubyfarm:r60001 ruby -v
-Unable to find image 'mametter/rubyfarm:r60001' locally
-r60001: Pulling from mametter/rubyfarm
+$ docker run --rm -t rubylang/rubyfarm:r60001 ruby -v
+Unable to find image 'rubylang/rubyfarm:r60001' locally
+r60001: Pulling from rubylang/rubyfarm
 
   *snip*
 
-Status: Downloaded newer image for mametter/rubyfarm:r60001
+Status: Downloaded newer image for rubylang/rubyfarm:r60001
 ruby 2.5.0dev (2017-09-23 trunk 60001) [x86_64-linux]
 ```
 
