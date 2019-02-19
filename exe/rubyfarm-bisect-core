@@ -5,7 +5,7 @@ require "shellwords"
 REPOSITORY = "rubylang/rubyfarm"
 
 puts
-rev = "r" + `git show HEAD`[%r(git-svn-id: svn\+ssh://ci.ruby-lang.org/ruby/trunk@(\d+)), 1]
+rev = `git rev-parse HEAD`.chomp
 log = -> msg do
   puts "\e[1m\e[32mrubyfarm-bisect[#{ rev }]: #{ msg }\e[0m"
 end
