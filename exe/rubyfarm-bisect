@@ -4,26 +4,31 @@ require "tmpdir"
 require "optparse"
 require "open3"
 
+Version = "1.1.1"
+
 FIRST_COMMIT = "7c1b30a602ab109d8d5388d7dfb3c5b180ba24e1" # r57410
 ORIGINAL_GIT_PATH = "https://git.ruby-lang.org/ruby.git"
 CORE = File.join(__dir__, "rubyfarm-bisect-core")
 
 good_commit = FIRST_COMMIT
-bad_commit = "trunk"
+bad_commit = "master"
 git_url = ORIGINAL_GIT_PATH
 mounts = []
 auto = true
 
 opt = OptionParser.new
 opt.on("-u URL", "--git-url URL", "URL of git repository (defalut: #{ ORIGINAL_GIT_PATH })") {|v| git_url = v }
-opt.on("-g COMMIT", "--good-commit COMMIT", "good commit (defalut: 7c1b30a)") {|v| good_commit = v }
-opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (defalut: trunk)") {|v| bad_commit = v }
+opt.on("-g COMMIT", "--good-commit COMMIT", "good commit (defalut: #{ FIRST_COMMIT })") {|v| good_commit = v }
+opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (defalut: master)") {|v| bad_commit = v }
 opt.on("-m PATH", "--mount-volume PATH", "mount PATH to /root (default: none)") {|v| mounts << v }
 opt.on("-t", "--test-rb", "run test.rb") do
   mounts = ["test.rb"]
   ARGV.concat(["ruby", "/root/test.rb"])
 end
 opt.on("--no-auto", "disable automatic detection of the order (good->bad or bad->good)") { auto = false }
+opt.on("")
+opt.on("Example: #{ File.basename($0) } -u /path/to/ruby/working-copy ruby -e 'some code'")
+opt.banner += " COMMAND"
 opt.order!(ARGV)
 
 mounts = mounts.flat_map do |path|

@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name          = "rubyfarm-bisect"
-  spec.version       = "1.1.0"
+  spec.version       = File.read(File.join(__dir__, "exe/rubyfarm-bisect"))[/Version = "(.*?)"/, 1]
   spec.authors       = ["Yusuke Endoh"]
   spec.email         = ["mame@ruby-lang.org"]
 
