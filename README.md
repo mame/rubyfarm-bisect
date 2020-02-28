@@ -14,7 +14,7 @@ By using rubyfarm-bisect, you don't have to worry about:
 You need to install rubyfarm-bisect.
 
 ```
-$ gem install rubyfarm-biesct
+$ gem install rubyfarm-bisect
 ```
 
 You also need to be able to use "docker" command without "sudo".
