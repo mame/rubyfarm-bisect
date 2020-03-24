@@ -76,7 +76,7 @@ Dir.mktmpdir do |dir|
       order = "normal"
       if auto
         system("git", "checkout", solve_rev[good_commit])
-        if !system(CORE, "--", *ARGV)
+        if !system(CORE, *mounts, "--", *ARGV)
           puts "\e[1m\e[32mThe beginning commit #{ good_commit } doesn't pass the test.  Find the first good commit. \e[0m"
           order = "reversed"
         end
