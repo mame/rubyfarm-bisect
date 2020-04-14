@@ -7,7 +7,7 @@ require "open3"
 Version = "1.1.2"
 
 FIRST_COMMIT = "7c1b30a602ab109d8d5388d7dfb3c5b180ba24e1" # r57410
-ORIGINAL_GIT_PATH = "https://git.ruby-lang.org/ruby.git"
+ORIGINAL_GIT_PATH = "https://github.com/ruby/ruby.git"
 CORE = File.join(__dir__, "rubyfarm-bisect-core")
 
 good_commit = FIRST_COMMIT

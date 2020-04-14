@@ -49,7 +49,7 @@ $ rubyfarm-bisect -g 7c1b30a6 -b trunk ruby -e '<your test code>'
 ```
 
 `-g` is a good commit, and `-b` is a bad commit.
-The arguments must be a SVN revision (e.g., "r60000"), or a commit hash of [git.ruby-lang.org/ruby.git](https://git.ruby-lang.org/ruby.git) (e.g., 7c1b30a6).
+The arguments must be a SVN revision (e.g., "r60000"), or a commit hash of [github.com/ruby/ruby.git](https://github.com/ruby/ruby.git) (e.g., 7c1b30a6).
 
 You don't have to worry about which is good and bad:
 
@@ -58,11 +58,11 @@ You don't have to worry about which is good and bad:
 
 ### `-u`: specify a git url
 
-This tool clones [the git repository of ruby](https://git.ruby-lang.org/ruby.git) into temporary directory, which takes some minutes.
+This tool clones [the git repository of ruby](https://github.com/ruby/ruby.git) into temporary directory, which takes some minutes.
 To make it fast, you can use your local repository:
 
 ```
-$ git clone https://git.ruby-lang.org/ruby /path/to/local/git/repo
+$ git clone https://github.com/ruby/ruby.git /path/to/local/git/repo
 $ rubyfarm-bisect -u /path/to/local/git/repo ruby -e '<your test code>'
 ```
 
