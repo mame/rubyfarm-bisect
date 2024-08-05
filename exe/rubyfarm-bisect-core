@@ -4,6 +4,8 @@ require "shellwords"
 
 REPOSITORY = "rubylang/rubyfarm"
 
+docker_exe = ENV.fetch("RUBYFARM_BISECT_DOCKER_EXE")
+
 puts
 rev = `git rev-parse HEAD`.chomp
 log = -> msg do
@@ -17,9 +19,9 @@ run = -> color, *cmd do
 end
 tag = REPOSITORY + ":#{ rev }"
 
-run["\e[34m", "docker", "image", "inspect", "-f", "ok", tag]
+run["\e[34m", docker_exe, "image", "inspect", "-f", "ok", tag]
 unless $?.success?
-  run["\e[34m", "docker", "pull", tag]
+  run["\e[34m", docker_exe, "pull", tag]
   unless $?.success?
     log["failed to pull #{ tag }; skip #{ rev }"]
     exit 125
@@ -30,7 +32,7 @@ i = ARGV.index("--")
 opt = ARGV[0, i]
 cmd = ARGV[i + 1 .. -1]
 
-run["\e[31m", "docker", "run", "--rm", "-t", *opt, tag, *cmd]
+run["\e[31m", docker_exe, "run", "--rm", "-t", *opt, tag, *cmd]
 
 status = $?.exitstatus
 msg = { 0 => "good", 125 => "skip" }[status] || "bad"

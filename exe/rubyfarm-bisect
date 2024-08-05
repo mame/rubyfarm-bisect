@@ -31,6 +31,17 @@ opt.on("Example: #{ File.basename($0) } -u /path/to/ruby/working-copy ruby -e 's
 opt.banner += " COMMAND"
 opt.order!(ARGV)
 
+docker_exe = ["docker", "podman"].find do |exe|
+  system("command", "-v", exe, out: File::NULL)
+end
+
+unless docker_exe
+  puts "Neither docker nor podman are in PATH"
+  exit(1)
+end
+
+ENV["RUBYFARM_BISECT_DOCKER_EXE"] = docker_exe
+
 mounts = mounts.flat_map do |path|
   path = File.expand_path(path)
   bind = nil
