@@ -17,9 +17,9 @@ mounts = []
 auto = true
 
 opt = OptionParser.new
-opt.on("-u URL", "--git-url URL", "URL of git repository (defalut: #{ ORIGINAL_GIT_PATH })") {|v| git_url = v }
-opt.on("-g COMMIT", "--good-commit COMMIT", "good commit (defalut: #{ FIRST_COMMIT })") {|v| good_commit = v }
-opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (defalut: master)") {|v| bad_commit = v }
+opt.on("-u URL", "--git-url URL", "URL of git repository (default: #{ ORIGINAL_GIT_PATH })") {|v| git_url = v }
+opt.on("-g COMMIT", "--good-commit COMMIT", "good commit (default: #{ FIRST_COMMIT })") {|v| good_commit = v }
+opt.on("-b COMMIT", "--bad-commit COMMIT", "bad commit (default: master)") {|v| bad_commit = v }
 opt.on("-m PATH", "--mount-volume PATH", "mount PATH to /root (default: none)") {|v| mounts << v }
 opt.on("-t", "--test-rb", "run test.rb") do
   mounts = ["test.rb"]
